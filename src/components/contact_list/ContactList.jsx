@@ -2,7 +2,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contactsSlice';
+import { deleteContact } from 'redux/operations';
 import { getFilteredContacts } from 'redux/selector';
 import {
   ListContainer,
@@ -19,7 +19,7 @@ export const ContactList = () => {
   const filteredContacts = useSelector(getFilteredContacts);
 
   const handleDelete = id => {
-    dispatch(deleteContact({ id }));
+    dispatch(deleteContact(id));
   };
   return (
     <ListContainer>

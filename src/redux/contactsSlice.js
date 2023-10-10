@@ -1,43 +1,52 @@
 // contactsSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import { fetchContacts, addContact, deleteContact } from './operations';
 
-const contactInitialState = {
-  contacts: [
-    { id: 1, name: 'Іван', number: '123456789' },
-    { id: 2, name: 'Марія', number: '987654321' },
-    { id: 3, name: 'Петро', number: '555555555' },
-  ],
+const handlePending = state => {
+  state.isLoading = true;
+};
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
 };
 
 const contactsSlice = createSlice({
   name: 'contacts',
-  initialState: contactInitialState,
-  reducers: {
-    addContact(state, action) {
-      const existingContact = state.contacts.find(
-        contact =>
-          contact.name.toLowerCase() === action.payload.name.toLowerCase()
+  initialState: {
+    contacts: [],
+    isLoading: false,
+    error: null,
+  },
+  extraReducers: {
+    [fetchContacts.pending]: handlePending,
+    [fetchContacts.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.contacts = action.payload;
+    },
+    [fetchContacts.rejected]: handleRejected,
+    [addContact.pending]: handlePending,
+    [addContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.contacts.push(action.payload);
+    },
+    [addContact.rejected]: handleRejected,
+    [deleteContact.pending]: handlePending,
+    [deleteContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const index = state.contacts.findIndex(
+        contact => contact.id === action.payload.id
       );
-      if (existingContact) {
-        alert(`"${existingContact.name}" is already in contacts.`);
-        return state;
-      } else {
-        return {
-          ...state,
-          contacts: [...state.contacts, action.payload],
-        };
+      if (index !== -1) {
+        state.contacts.splice(index, 1);
       }
     },
-    deleteContact(state, action) {
-      return {
-        ...state,
-        contacts: state.contacts.filter(
-          contact => contact.id !== action.payload.id
-        ),
-      };
-    },
+    [deleteContact.rejected]: handleRejected,
   },
 });
-
-export const { addContact, deleteContact } = contactsSlice.actions;
+export const getIsLoading = state => state.contacts.isLoading;
+export const getError = state => state.contacts.error;
 export const contactsReducer = contactsSlice.reducer;
